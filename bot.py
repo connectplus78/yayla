@@ -70,7 +70,7 @@ def aa_kategorili_haber_cek():
         "Ekonomi": "https://www.aa.com.tr/tr/rss/default?cat=ekonomi",
         "Spor": "https://www.aa.com.tr/tr/rss/default?cat=spor",
         "Dünya": "https://www.aa.com.tr/tr/rss/default?cat=dunya",
-"Teknoloji-Bilim": "https://www.aa.com.tr/tr/rss/default?cat=bilim-teknoloji",
+        "Bilim & Teknoloji": "https://www.aa.com.tr/tr/rss/default?cat=bilim-teknoloji",
         "Yaşam & Sanat": "https://www.aa.com.tr/tr/rss/default?cat=yasam"
     }
     
