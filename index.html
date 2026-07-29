@@ -173,7 +173,6 @@
         .back-btn { display:inline-flex;align-items:center;gap:8px;padding:10px 22px;margin-bottom:1.5rem; background:var(--bg-glass);border:1px solid var(--border-color);border-radius:16px; color:var(--text-primary);font-weight:700;font-size:.88rem;cursor:pointer; transition:all .3s; }
         .back-btn:hover { border-color:var(--accent-2);color:var(--accent-2);transform:translateX(-4px); }
         
-        /* Footer Kesin Görünürlük Yapısı */
         .site-footer {
             position: relative;
             z-index: 10;
@@ -270,15 +269,24 @@
     </footer>
 
     <script>
+        // Tema Yönetimi Düzeltmesi
         const themeBtn = document.getElementById('theme-toggle');
-        const saved = localStorage.getItem('theme') || 'dark';
-        document.documentElement.setAttribute('data-theme', saved);
-        themeBtn.textContent = saved === 'dark' ? '🌙' : '☀️';
+        
+        function setTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            themeBtn.textContent = theme === 'dark' ? '🌙' : '☀️';
+        }
+
+        // Sayfa açıldığında kayıtlı temayı uygula
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        setTheme(savedTheme);
+
+        // Butona tıklama olayı
         themeBtn.addEventListener('click', () => {
-            const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-            document.documentElement.setAttribute('data-theme', next);
-            localStorage.setItem('theme', next);
-            themeBtn.textContent = next === 'dark' ? '🌙' : '☀️';
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            setTheme(newTheme);
         });
 
         window.addEventListener('scroll', () => {
@@ -391,6 +399,7 @@
                 }
                 
                 haberleriEkranaCiz(globalHaberler);
+                guncellemeZamaniniYazdir();
             } catch (hata) {
                 document.getElementById('haberler-listesi').innerHTML = `<div class="error-state" style="grid-column:1/-1"><p>Haberler yüklenemedi. Bot henüz çalışmamış olabilir.</p></div>`;
             }
