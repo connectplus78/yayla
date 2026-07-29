@@ -27,8 +27,6 @@
             --shadow-card-hover: 0 20px 60px rgba(0,0,0,0.5);
             --navbar-bg: rgba(10,10,26,0.8);
             --ticker-bg: rgba(244,63,94,0.1);
-            --skeleton-base: rgba(255,255,255,0.04);
-            --skeleton-shine: rgba(255,255,255,0.08);
             --detail-bg: #0e0e22;
             --overlay-gradient: linear-gradient(to top, rgba(10,10,26,0.95) 0%, rgba(10,10,26,0.4) 50%, transparent 100%);
             --market-bg: rgba(255,255,255,0.03);
@@ -51,21 +49,20 @@
             --shadow-card-hover: 0 20px 60px rgba(0,0,0,0.15);
             --navbar-bg: rgba(240,240,248,0.85);
             --ticker-bg: rgba(244,63,94,0.08);
-            --skeleton-base: rgba(0,0,0,0.04);
-            --skeleton-shine: rgba(0,0,0,0.08);
             --detail-bg: #ffffff;
             --overlay-gradient: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 50%, transparent 100%);
             --market-bg: rgba(0,0,0,0.02);
             --market-border: rgba(0,0,0,0.06);
         }
         * { margin:0; padding:0; box-sizing:border-box; }
+        html { min-height: 100vh; }
         body {
             font-family:'Inter',-apple-system,sans-serif; background:var(--bg-primary); color:var(--text-primary);
-            min-height:100vh; overflow-x:hidden; transition:background .5s,color .5s;
+            min-height:100vh; display: flex; flex-direction: column; overflow-x:hidden; transition:background .5s,color .5s;
         }
         .bg-animated {
             position:fixed; inset:0; z-index:0; background:linear-gradient(135deg,#0a0a1a 0%,#1a1040 25%,#0d1b3e 50%,#1a0a2e 75%,#0a0a1a 100%);
-            background-size:400% 400%; animation:gradientShift 15s ease infinite;
+            background-size:400% 400%; animation:gradientShift 15s ease infinite; pointer-events: none;
         }
         [data-theme="light"] .bg-animated { background:linear-gradient(135deg,#f0f0f8 0%,#e8e0f8 25%,#e0e8f8 50%,#f0e8f8 75%,#f0f0f8 100%); background-size:400% 400%; }
         @keyframes gradientShift { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
@@ -114,7 +111,7 @@
         .ticker-item::before { content:'◆';position:absolute;left:0;color:var(--accent-2);font-size:.5rem;top:50%;transform:translateY(-50%); }
         @keyframes tickerScroll { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
 
-        .main-container { position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:2rem 1.5rem 4rem; }
+        .main-container { position:relative; z-index:1; max-width:1280px; width: 100%; margin:0 auto; padding:2rem 1.5rem 4rem; flex: 1; }
         .news-grid { display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1.8rem;margin-top:1rem; }
         @media(max-width:400px){ .news-grid{grid-template-columns:1fr;} }
         
@@ -175,6 +172,31 @@
         .detail-body iframe { max-width: 100%; border-radius: 12px; margin-bottom: 1.5rem; }
         .back-btn { display:inline-flex;align-items:center;gap:8px;padding:10px 22px;margin-bottom:1.5rem; background:var(--bg-glass);border:1px solid var(--border-color);border-radius:16px; color:var(--text-primary);font-weight:700;font-size:.88rem;cursor:pointer; transition:all .3s; }
         .back-btn:hover { border-color:var(--accent-2);color:var(--accent-2);transform:translateX(-4px); }
+        
+        /* Footer Kesin Görünürlük Yapısı */
+        .site-footer {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            padding: 2.5rem 1rem;
+            margin-top: auto;
+            border-top: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            line-height: 1.6;
+            width: 100%;
+        }
+        .site-footer .footer-brand {
+            color: var(--accent-1);
+            font-weight: 700;
+        }
+        .site-footer .update-text {
+            margin-top: 4px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
         @keyframes fadeInUp { from{opacity:0;transform:translateY(40px)} to{opacity:1;transform:translateY(0)} }
         .animate-in { animation:fadeInUp .7s forwards;opacity:0; }
         ::-webkit-scrollbar { width:8px; }
@@ -240,6 +262,13 @@
         </div>
     </div>
 
+    <footer class="site-footer">
+        <div class="footer-content">
+            <p>&copy; 2026 <span class="footer-brand">Connect Plus</span> Özel Yayınıdır.</p>
+            <p class="update-text">Son Güncelleme: <span id="son-guncelleme-tarihi">Yükleniyor...</span></p>
+        </div>
+    </footer>
+
     <script>
         const themeBtn = document.getElementById('theme-toggle');
         const saved = localStorage.getItem('theme') || 'dark';
@@ -257,11 +286,24 @@
             document.getElementById('progress-bar').style.width = (dh > 0 ? (st / dh) * 100 : 0) + '%';
         });
 
-        // Stabilize edilmiş, hata korumalı (fallback destekli) piyasa çekme motoru
+        function guncellemeZamaniniYazdir() {
+            const simdi = new Date();
+            const gun = String(simdi.getDate()).padStart(2, '0');
+            const ay = String(simdi.getMonth() + 1).padStart(2, '0');
+            const yil = simdi.getFullYear();
+            const saat = String(simdi.getHours()).padStart(2, '0');
+            const dakika = String(simdi.getMinutes()).padStart(2, '0');
+            
+            const formatliZaman = `${gun}-${ay}-${yil} ${saat}:${dakika}`;
+            const element = document.getElementById('son-guncelleme-tarihi');
+            if(element) {
+                element.textContent = formatliZaman;
+            }
+        }
+
         async function piyasalariGetir() {
             const strip = document.getElementById('market-strip-inner');
             
-            // Varsayılan / Güvenli Yedek Değerler (API kesintilerine karşı)
             let usdTry = 34.20, usdChange = 0.18;
             let eurTry = 37.10, eurChange = 0.15;
             let goldGramTry = 2950.50, goldChange = 0.45;
@@ -270,7 +312,6 @@
             let btcUsdt = 67450.00, btcChange = 2.45;
             let ethUsdt = 3520.00, ethChange = 1.80;
 
-            // 1. Döviz Kurları (Open ER API - Güvenilir ve Ücretsiz)
             try { 
                 const r = await fetch('https://open.er-api.com/v6/latest/USD'); 
                 const d = await r.json(); 
@@ -278,9 +319,8 @@
                     usdTry = d.rates.TRY; 
                     eurTry = usdTry / (d.rates.EUR || 1); 
                 } 
-            } catch (e) { console.warn("Döviz API hatası, yedek değerler kullanılıyor."); }
+            } catch (e) {}
 
-            // 2. Kripto Paralar (CoinGecko Alternatif Hafif Uç Nokta)
             try {
                 const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd&include_24hr_change=true');
                 const d = await r.json();
@@ -288,9 +328,8 @@
                     if (d.bitcoin?.usd) { btcUsdt = d.bitcoin.usd; btcChange = d.bitcoin.usd_24h_change || 0; }
                     if (d.ethereum?.usd) { ethUsdt = d.ethereum.usd; ethChange = d.ethereum.usd_24h_change || 0; }
                 }
-            } catch (e) { console.warn("Kripto API limiti, yedek değerler kullanılıyor."); }
+            } catch (e) {}
 
-            // 3. Altın Hesaplama (Ons / Gram)
             try { 
                 const r = await fetch('https://api.gold-api.com/price/XAU'); 
                 const d = await r.json(); 
@@ -333,6 +372,7 @@
                 </div>`).join('');
                 
             strip.innerHTML = html.repeat(6);
+            guncellemeZamaniniYazdir();
         }
         piyasalariGetir();
 
